@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+import cv2
 import numpy as np
 
 class Preprocess():
@@ -23,6 +24,30 @@ class Preprocess():
         self.x /= 255
         return self
 
+    def sift(self):
+        def it(im):
+            sift = cv2.xfeatures2d.SIFT_create()
+            return sift.detectAndCompute(im, None)
+
+        self.sift_kp = np.array([it(self.x[i,:,:]) for i in range(0, np.shape(self.x)[0])])
+        return self
+
+    def convolve_pool(self, kmeans):
+        def pool(im):
+            def poolIt(k):
+                sum = np.zeros((64,))
+                for i in range(0,6):
+                    for j in range(0,6):
+                        sum += im[k+i,k+j,:]
+                return sum/36
+
+            return np.array([poolIt(k) for k in [0,6,12,18]]).reshape(256,)
+
+        def it(im):
+            return pool(np.array([[kmeans.cluster_centers_[kmeans.predict(im[i:i+8,j:j+8].reshape(1,64))[0]] for i in range(0,24)] for j in range(0,24)]))
+
+        self.x = np.array([it(self.x[i,:,:]) for i in range(0, np.shape(self.x)[0])])
+        return self
 
     def scale(self):
         def it(x):
@@ -30,6 +55,19 @@ class Preprocess():
 
         scaleVector = np.array([it(x) for x in range(0,32)])
         self.x = np.array([self.x[i,:,:] * scaleVector for i in range(0, np.shape(self.x)[0])])
+        return self
+
+    def scale2(self):
+        import math
+        def it(x):
+            return 17.5/(7*((2*math.pi)**(1/2)))*math.exp(-(x-16)**2/98)
+
+        scaleVector = np.array([it(x) for x in range(0,32)])
+        self.x = np.array([self.x[i,:,:] * scaleVector for i in range(0, np.shape(self.x)[0])])
+        return self
+
+    def uint8(self):
+        self.x = self.x.astype('uint8')
         return self
 
     def flatten(self):
