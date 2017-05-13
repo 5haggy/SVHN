@@ -27,7 +27,7 @@ class Preprocess():
     def sift(self):
         def it(im):
             sift = cv2.xfeatures2d.SIFT_create()
-            return sift.detectAndCompute(im, None)
+            return sift.detectAndCompute(im, None)[1]
 
         self.sift_kp = np.array([it(self.x[i,:,:]) for i in range(0, np.shape(self.x)[0])])
         return self

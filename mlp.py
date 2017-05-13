@@ -1,12 +1,13 @@
 from __future__ import print_function
+from functools import reduce
 
 import keras
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras.optimizers import SGD
 
-def create_mlp(activationFn, numOfNeurons, numOfInputs, dropOut = 0):
-    name = activationFn + ' ' + str(numOfNeurons) + ' ' + str(dropOut)
+def create_mlp(inputs, *layers):
+    name = ' '.join([str(val) for layer in layers for val in layer])
 
     print('------------------')
     print(name)
@@ -14,10 +15,14 @@ def create_mlp(activationFn, numOfNeurons, numOfInputs, dropOut = 0):
 
     model = Sequential()
 
-    model.add(Dense(numOfNeurons, activation=activationFn, input_shape=(numOfInputs,)))
+    model.add(Dense(layers[0][1], activation=layers[0][0], input_shape=(inputs,)))
+    if layers[0][2] != 0:
+        model.add(Dropout(layers[0][2]))
 
-    if dropOut != 0:
-        model.add(Dropout(dropOut))
+    for layer in layers[1:]:
+        model.add(Dense(layer[1], activation=layer[0]))
+        if layer[2] != 0:
+            model.add(Dropout(layer[2]))
 
     model.add(Dense(10, activation='softmax'))
 

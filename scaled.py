@@ -18,7 +18,7 @@ print(x_train.shape[0], 'train samples')
 print(x_valid.shape[0], 'validation samples')
 print(x_test.shape[0], 'test samples')
 
-(name, model) = mlp.create_mlp('relu', 512, 1024)
+(name, model) = mlp.create_mlp(1024, ('relu', 512, 50), ('relu', 512, 50))
 
 mlp.train_mlp(model, 200, x_train, y_train, x_valid, y_valid)
 mlp.test_mlp(model, x_test, y_test)
