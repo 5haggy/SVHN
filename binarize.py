@@ -7,9 +7,9 @@ from scipy.io import loadmat as load
 import mlp
 from preprocess import Preprocess
 
-(x_train, y_train) = Preprocess(load('train_32x32.mat')).rgb2gray().normalize().scale2().flatten().get()
+(x_train, y_train) = Preprocess(load('train_32x32.mat')).rgb2gray().normalize().scale2().uint8().binarize().flatten().get()
 
-(x_test, y_test) = Preprocess(load('test_32x32.mat')).rgb2gray().normalize().scale2().flatten().get()
+(x_test, y_test) = Preprocess(load('test_32x32.mat')).rgb2gray().normalize().scale2().uint8().binarize().flatten().get()
 
 (x_valid, y_valid) = (x_train[math.floor(0.8*len(x_train)):,:], y_train[math.floor(0.8*len(y_train)):,:])
 (x_train, y_train) = (x_train[:math.floor(0.8*len(x_train)),:], y_train[:math.floor(0.8*len(y_train)),:])

@@ -2,6 +2,8 @@ from __future__ import print_function
 
 import cv2
 import numpy as np
+from scipy.spatial.distance import euclidean
+from functools import reduce
 
 class Preprocess():
     def __init__(self, data):
@@ -24,29 +26,54 @@ class Preprocess():
         self.x /= 255
         return self
 
-    def sift(self):
+    def standarize(self):
         def it(im):
-            sift = cv2.xfeatures2d.SIFT_create()
-            return sift.detectAndCompute(im, None)[1]
+            flat = im.reshape(1, 1024)
+            (mean, sd) = (np.mean(flat), np.std(flat))
+            return (im - mean)/sd
 
-        self.sift_kp = np.array([it(self.x[i,:,:]) for i in range(0, np.shape(self.x)[0])])
+        self.x = np.array([it(x) for x in self.x])
+        return self
+
+    def binarize(self):
+        self.x = np.array([cv2.threshold(x,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)[1] for x in self.x])
+        return self
+
+    def sift(self, kmeans):
+        sift = cv2.xfeatures2d.SIFT_create()
+
+        def it(im):
+            points = np.array(sift.detectAndCompute(im, None)[1])
+            bov = np.zeros((len(kmeans.cluster_centers_),))
+            if np.shape(points) == ():
+                points = np.zeros((0,128))
+            for point in points:
+                bov[kmeans.predict(point)[0]] += 1
+            return bov
+
+        self.x = np.array([it(im) for im in self.x])
         return self
 
     def convolve_pool(self, kmeans):
         def pool(im):
-            def poolIt(k):
-                sum = np.zeros((64,))
+            def poolIt(k,l):
+                sum = np.zeros((500,))
                 for i in range(0,6):
                     for j in range(0,6):
-                        sum += im[k+i,k+j,:]
+                        sum += im[k+i,l+j,:]
                 return sum/36
 
-            return np.array([poolIt(k) for k in [0,6,12,18]]).reshape(256,)
+            return np.array([poolIt(k,l) for k in [0,6] for l in [0,6]]).reshape(2000,)
 
-        def it(im):
-            return pool(np.array([[kmeans.cluster_centers_[kmeans.predict(im[i:i+8,j:j+8].reshape(1,64))[0]] for i in range(0,24)] for j in range(0,24)]))
+        def convolve(im):
+            distances = [euclidean(im, cc) for cc in kmeans.cluster_centers_]
+            mean = np.mean(distances)
+            return np.array([max(0, mean - distance) for distance in distances])
+        def it(im,iters):
+            print(iters)
+            return pool(np.array([[convolve(im[i:i+8,j:j+8].reshape(64,)) for i in range(0,24,2)] for j in range(0,24,2)]))
 
-        self.x = np.array([it(self.x[i,:,:]) for i in range(0, np.shape(self.x)[0])])
+        self.x = np.array([it(self.x[i,:,:], i) for i in range(0, np.shape(self.x)[0])])
         return self
 
     def scale(self):
