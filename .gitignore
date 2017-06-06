@@ -2,3 +2,6 @@
 __pycache__
 *.mat
 *.pickle
+*.h5
+*.txt
+*.png

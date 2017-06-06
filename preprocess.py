@@ -2,18 +2,19 @@ from __future__ import print_function
 
 import cv2
 import numpy as np
+import keras
 from scipy.spatial.distance import euclidean
 from functools import reduce
+from skimage.feature import hog
 
 class Preprocess():
     def __init__(self, data):
-        def get_category(num):
-            y = np.zeros((1, 10))
-            y[:, num - 1] = 1
-            return y
-
         self.x = data['X']
-        self.y = np.array([get_category(num[0]) for num in data['y']]).reshape(len(data['y']), 10)
+        self.y = data['y']
+        self.y = self.y.reshape(len(self.y),)
+        self.y[self.y == 10] = 0
+        self.y = keras.utils.to_categorical(self.y, 10)
+        #self.x = np.array([self.x[:,:,:,i] for i in range(0, np.shape(self.x)[3])])
 
     def rgb2gray(self):
         def it(im):
@@ -37,6 +38,10 @@ class Preprocess():
 
     def binarize(self):
         self.x = np.array([cv2.threshold(x,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)[1] for x in self.x])
+        return self
+
+    def hog(self):
+        self.x = np.array([hog(x, orientations=9, pixels_per_cell=(6, 6),block_norm="L2") for x in self.x])
         return self
 
     def sift(self, kmeans):

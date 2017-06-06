@@ -16,17 +16,37 @@ print(x_train.shape[0], 'train samples')
 print(x_valid.shape[0], 'validation samples')
 print(x_test.shape[0], 'test samples')
 
-(name, model) = mlp.create_mlp(100, ('relu', 512, 0))
+(name, model) = mlp.create_mlp(500, 0, ('relu', 16, 0))
 
 mlp.train_mlp(model, 20, x_train, y_train, x_valid, y_valid)
 mlp.test_mlp(model, x_test, y_test)
 
-(name, model) = mlp.create_mlp(100, ('relu', 256, 0))
+(name, model) = mlp.create_mlp(500, 0, ('relu', 32, 0))
 
 mlp.train_mlp(model, 20, x_train, y_train, x_valid, y_valid)
 mlp.test_mlp(model, x_test, y_test)
 
-(name, model) = mlp.create_mlp(100, ('relu', 128, 0))
+(name, model) = mlp.create_mlp(500, 0, ('relu', 64, 0))
+
+mlp.train_mlp(model, 20, x_train, y_train, x_valid, y_valid)
+mlp.test_mlp(model, x_test, y_test)
+
+(name, model) = mlp.create_mlp(500, 0, ('relu', 128, 0))
+
+mlp.train_mlp(model, 20, x_train, y_train, x_valid, y_valid)
+mlp.test_mlp(model, x_test, y_test)
+
+(name, model) = mlp.create_mlp(500, 0, ('relu', 256, 0))
+
+mlp.train_mlp(model, 20, x_train, y_train, x_valid, y_valid)
+mlp.test_mlp(model, x_test, y_test)
+
+(name, model) = mlp.create_mlp(500, 1e-6, ('relu', 512, 0))
+
+mlp.train_mlp(model, 20, x_train, y_train, x_valid, y_valid)
+mlp.test_mlp(model, x_test, y_test)
+
+(name, model) = mlp.create_mlp(500, 0, ('relu', 1024, 50))
 
 mlp.train_mlp(model, 20, x_train, y_train, x_valid, y_valid)
 mlp.test_mlp(model, x_test, y_test)
