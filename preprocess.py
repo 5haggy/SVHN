@@ -6,6 +6,7 @@ import keras
 from scipy.spatial.distance import euclidean
 from functools import reduce
 from skimage.feature import hog
+from sklearn.decomposition import PCA
 
 class Preprocess():
     def __init__(self, data):
@@ -27,6 +28,11 @@ class Preprocess():
         self.x /= 255
         return self
 
+    def whiten(self):
+        pca = PCA(whiten=True)
+        #pca.fit(X).transform(X)
+        return self
+
     def standarize(self):
         def it(im):
             flat = im.reshape(1, 1024)
@@ -40,8 +46,8 @@ class Preprocess():
         self.x = np.array([cv2.threshold(x,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)[1] for x in self.x])
         return self
 
-    def hog(self):
-        self.x = np.array([hog(x, orientations=9, pixels_per_cell=(6, 6),block_norm="L2") for x in self.x])
+    def hog(self, pixels_per_cell=(6,6)):
+        self.x = np.array([hog(x, orientations=9, pixels_per_cell=pixels_per_cell,block_norm="L2") for x in self.x])
         return self
 
     def sift(self, kmeans):

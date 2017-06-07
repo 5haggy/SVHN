@@ -12,12 +12,12 @@ from scipy.io import loadmat as load
 from preprocess import Preprocess
 
 # this is the size of our encoded representations
-encoding_dim = 144
+encoding_dim = 256
 
 # this is our input placeholder
 input_img = Input(shape=(1024,))
 # "encoded" is the encoded representation of the input
-encoded = Dense(encoding_dim, activation='relu')(input_img)
+encoded = Dense(encoding_dim, activation='sigmoid')(input_img)
 # "decoded" is the lossy reconstruction of the input
 decoded = Dense(1024, activation='sigmoid')(encoded)
 
@@ -34,7 +34,7 @@ decoder_layer = autoencoder.layers[-1]
 # create the decoder model
 decoder = Model(encoded_input, decoder_layer(encoded_input))
 
-autoencoder.compile('adadelta', loss='binary_crossentropy')
+autoencoder.compile('adadelta', loss='mse')
 
 (x_train, y_train) = Preprocess(load('train_32x32.mat')).rgb2gray().normalize().flatten().get()
 
@@ -47,33 +47,33 @@ x_test_noisy = x_test + noise_factor * np.random.normal(loc=0.0, scale=1.0, size
 x_train_noisy = np.clip(x_train_noisy, 0., 1.)
 x_test_noisy = np.clip(x_test_noisy, 0., 1.)
 
-autoencoder.fit(x_train_noisy, x_train,
+autoencoder.fit(x_train, x_train,
                 epochs=25,
                 batch_size=256,
                 shuffle=True,
-                validation_data=(x_test_noisy, x_test))
+                validation_data=(x_test, x_test))
 
 w = np.squeeze(autoencoder.layers[1].get_weights())
 hw = w[0].T
 l = autoencoder.layers[1]
-pickle.dump(w, open('w1.pickle', 'wb'))
-pickle.dump(l, open('l1.pickle', 'wb'))
+#pickle.dump(w, open('w1.pickle', 'wb'))
+#pickle.dump(l, open('l1.pickle', 'wb'))
 
-encoded_imgs_train = encoder.predict(x_train_noisy)
-encoded_imgs_test = encoder.predict(x_test_noisy)
+encoded_imgs_train = encoder.predict(x_train)
+encoded_imgs_test = encoder.predict(x_test)
 decoded_imgs = decoder.predict(encoded_imgs_test)
 
-pickle.dump(encoded_imgs_train, open('f1train.pickle', 'wb'))
-pickle.dump(encoded_imgs_test, open('f1test.pickle', 'wb'))
+#pickle.dump(encoded_imgs_train, open('f1train.pickle', 'wb'))
+#pickle.dump(encoded_imgs_test, open('f1test.pickle', 'wb'))
 #pickle.dump(autoencoder, open('ae1.pickle', 'wb'))
-pickle.dump(encoder, open('e1.pickle', 'wb'))
+#pickle.dump(encoder, open('e1.pickle', 'wb'))
 #pickle.dump(decoder, open('d1.pickle', 'wb'))
-
+"""
 n=10
 plt.figure(figsize=(30, 8))
 for i in range(n):
     ax = plt.subplot(3, n, i + 1)
-    plt.imshow(x_test_noisy[i].reshape(32, 32))
+    plt.imshow(x_test[i].reshape(32, 32))
     plt.gray()
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
@@ -83,7 +83,7 @@ for i in range(n):
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
     ax = plt.subplot(3, n, i + 1 + n + n)
-    plt.imshow(encoded_imgs_test[i].reshape(12, 12))
+    plt.imshow(encoded_imgs_test[i].reshape(16, 16))
     plt.gray()
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
@@ -110,7 +110,7 @@ plt.show()
 
 #weights = autoencoder.layers[0].W.get_value(borrow=True)
 
-"""
+
 # this is the size of our encoded representations
 encoding_dim2 = 64
 
