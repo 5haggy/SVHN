@@ -88,14 +88,6 @@ class Preprocess():
         return self
 
     def scale(self):
-        def it(x):
-            return -x*(x-31)/250
-
-        scaleVector = np.array([it(x) for x in range(0,32)])
-        self.x = np.array([self.x[i,:,:] * scaleVector for i in range(0, np.shape(self.x)[0])])
-        return self
-
-    def scale2(self):
         import math
         def it(x):
             return 17.5/(7*((2*math.pi)**(1/2)))*math.exp(-(x-16)**2/98)

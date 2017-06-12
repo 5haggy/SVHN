@@ -12,4 +12,4 @@ ims = np.array([x[i,k:k+8,j:j+8] for k in [0,8,16,24] for j in [0,8,16,24] for i
 ims = ims.reshape(np.shape(ims)[0], 64)
 print('KMeans')
 kmeans = MiniBatchKMeans(n_clusters=500, init='k-means++',verbose=0).fit(ims)
-pickle.dump(kmeans, open('kmeans.pickle', 'wb'))
+pickle.dump(kmeans, open('kmeans/kmeans.pickle', 'wb'))

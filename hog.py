@@ -6,9 +6,11 @@ from scipy.io import loadmat as load
 import numpy as np
 import matplotlib.pyplot as plt
 import keras
+from sklearn import svm
 
 import mlp
 from preprocess import Preprocess
+from plot import plot_weights
 
 (x_train, y_train) = Preprocess(load('train_32x32.mat')).rgb2gray().standarize().hog((4,4)).get()
 
@@ -21,40 +23,12 @@ print(x_train.shape[0], 'train samples')
 print(x_valid.shape[0], 'validation samples')
 print(x_test.shape[0], 'test samples')
 
-(name, model) = mlp.create_mlp(np.shape(x_train)[1], 0, ('relu', 1200, 0.3))
+(name, model) = mlp.create_mlp(np.shape(x_train)[1], 1e-5, ('tanh', 700, 0.3))
 
-mlp.train_mlp(model, 100, x_train, y_train, x_valid, y_valid)
+mlp.train_mlp(model, 150, x_train, y_train, x_valid, y_valid)
 mlp.test_mlp(model, x_test, y_test)
 
 w = np.squeeze(model.layers[0].get_weights())
 hw = w[0].T
 dim=int(np.shape(x_train)[1]**(1/2))
-n=10
-plt.figure(figsize=(50, 8))
-for i in range(n):
-    ax = plt.subplot(5, n, i + 1)
-    plt.imshow(hw[i].reshape(dim, dim))
-    plt.gray()
-    ax.get_xaxis().set_visible(False)
-    ax.get_yaxis().set_visible(False)
-    ax = plt.subplot(5, n, i + 1 + n)
-    plt.imshow(hw[i+n].reshape(dim, dim))
-    plt.gray()
-    ax.get_xaxis().set_visible(False)
-    ax.get_yaxis().set_visible(False)
-    ax = plt.subplot(5, n, i + 1 + n + n)
-    plt.imshow(hw[n+n+i].reshape(dim, dim))
-    plt.gray()
-    ax.get_xaxis().set_visible(False)
-    ax.get_yaxis().set_visible(False)
-    ax = plt.subplot(5, n, i + 1 + n + n + n)
-    plt.imshow(hw[n+n+i+n].reshape(dim, dim))
-    plt.gray()
-    ax.get_xaxis().set_visible(False)
-    ax.get_yaxis().set_visible(False)
-    ax = plt.subplot(5, n, i + 1 + n + n +n +n)
-    plt.imshow(hw[n+n+i+n+n].reshape(dim, dim))
-    plt.gray()
-    ax.get_xaxis().set_visible(False)
-    ax.get_yaxis().set_visible(False)
-plt.show()
+plot_weights(hw,dim)
