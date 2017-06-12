@@ -1,5 +1,6 @@
 from __future__ import print_function
 from functools import reduce
+import matplotlib.pyplot as plt
 
 import keras
 from keras.models import Sequential
@@ -40,16 +41,17 @@ def create_mlp(inputs,l2, *layers):
 
 def train_mlp(model, numOfEpochs, x_train, y_train, x_valid, y_valid):
     csv_logger = CSVLogger('training {0}.csv'.format(name))
-    history =model.fit(x_train, y_train,
-                batch_size=128,
-                epochs=numOfEpochs,
-                verbose=1,
-                callbacks=[csv_logger],
-                validation_data=(x_valid, y_valid)                )
+
+    history = model.fit(x_train, y_train,
+                        batch_size=128,
+                        epochs=numOfEpochs,
+                        verbose=1,
+                        callbacks=[csv_logger],
+                        validation_data=(x_valid, y_valid))
+
     print(history.history.keys())
     model.save('{0}.h5'.format(name))
-    
-# summarize history for accuracy
+
     plt.plot(history.history['acc'])
     plt.plot(history.history['val_acc'])
     plt.title('model accuracy')
@@ -58,7 +60,7 @@ def train_mlp(model, numOfEpochs, x_train, y_train, x_valid, y_valid):
     plt.legend(['train', 'test'], loc='upper left')
     plt.savefig('{0} accurancy.png'.format(name), bbox_inches='tight')
     plt.show()
-# summarize history for loss
+
     plt.plot(history.history['loss'])
     plt.plot(history.history['val_loss'])
     plt.title('model loss')
@@ -67,7 +69,6 @@ def train_mlp(model, numOfEpochs, x_train, y_train, x_valid, y_valid):
     plt.legend(['train', 'test'], loc='upper left')
     plt.savefig('{0} loss.png'.format(name), bbox_inches='tight')
     plt.show()
-    return 
 
 def test_mlp(model, x_test, y_test):
     score = model.evaluate(x_test, y_test, verbose=0)
