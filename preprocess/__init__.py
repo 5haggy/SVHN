@@ -15,13 +15,13 @@ class Preprocess():
         self.y = self.y.reshape(len(self.y),)
         self.y[self.y == 10] = 0
         self.y = keras.utils.to_categorical(self.y, 10)
-        #self.x = np.array([self.x[:,:,:,i] for i in range(0, np.shape(self.x)[3])])
+        self.x = np.array([self.x[:,:,:,i] for i in range(0, np.shape(self.x)[3])])
 
     def rgb2gray(self):
         def it(im):
             return np.dot(im, [0.299, 0.587, 0.114])
 
-        self.x = np.array([it(self.x[:,:,:,i]) for i in range(0, np.shape(self.x)[3])])
+        self.x = np.array([it(x) for x in self.x])
         return self
 
     def normalize(self):
